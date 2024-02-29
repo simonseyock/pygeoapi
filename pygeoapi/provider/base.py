@@ -32,6 +32,8 @@ import logging
 from enum import Enum
 from http import HTTPStatus
 
+from pygeoapi.error import GenericError
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -179,24 +181,6 @@ class BaseProvider:
 
         raise NotImplementedError()
 
-    def get_coverage_domainset(self):
-        """
-        Provide coverage domainset
-
-        :returns: CIS JSON object of domainset metadata
-        """
-
-        raise NotImplementedError()
-
-    def get_coverage_rangetype(self):
-        """
-        Provide coverage rangetype
-
-        :returns: CIS JSON object of rangetype metadata
-        """
-
-        raise NotImplementedError()
-
     def _load_and_prepare_item(self, item, identifier=None,
                                accept_missing_identifier=False,
                                raise_if_exists=True):
@@ -272,22 +256,9 @@ class BaseProvider:
         return f'<BaseProvider> {self.type}'
 
 
-class ProviderGenericError(Exception):
+class ProviderGenericError(GenericError):
     """provider generic error"""
-    ogc_exception_code = 'NoApplicableCode'
-    http_status_code = HTTPStatus.INTERNAL_SERVER_ERROR
     default_msg = 'generic error (check logs)'
-
-    def __init__(self, msg=None, *args, user_msg=None) -> None:
-        # if only a user_msg is provided, use it as msg
-        if user_msg and not msg:
-            msg = user_msg
-        super().__init__(msg, *args)
-        self.user_msg = user_msg
-
-    @property
-    def message(self):
-        return self.user_msg if self.user_msg else self.default_msg
 
 
 class ProviderConnectionError(ProviderGenericError):
